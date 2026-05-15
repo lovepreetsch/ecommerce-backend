@@ -19,6 +19,13 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyRole('VENDOR','ADMIN')")
+    @Operation(summary = "Get all inventory records")
+    public ResponseEntity<ApiResponse<List<InventoryDTO>>> getAllInventory() {
+        return ResponseEntity.ok(ApiResponse.success(inventoryService.getAllInventory()));
+    }
+
     @GetMapping("/{productId}")
     @Operation(summary = "Get stock level for a product")
     public ResponseEntity<ApiResponse<InventoryDTO>> getInventory(@PathVariable Long productId) {

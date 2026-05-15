@@ -95,4 +95,12 @@ public class UserController {
 
         return ResponseEntity.ok(ApiResponse.success(pagedResponse));
     }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: delete user profile")
+    public ResponseEntity<ApiResponse<Void>> deleteProfile(@PathVariable Long id) {
+        userService.deleteProfile(id);
+        return ResponseEntity.ok(ApiResponse.success("User profile deleted", null));
+    }
 }

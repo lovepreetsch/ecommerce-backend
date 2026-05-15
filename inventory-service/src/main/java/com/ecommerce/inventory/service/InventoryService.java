@@ -25,6 +25,11 @@ public class InventoryService {
     private final InventoryMovementRepository movementRepository;
     private final RabbitTemplate rabbitTemplate;
 
+    public List<InventoryDTO> getAllInventory() {
+        return inventoryRepository.findAll().stream()
+                .map(this::mapToDTO).collect(Collectors.toList());
+    }
+
     public InventoryDTO getByProductId(Long productId) {
         Inventory inv = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));

@@ -140,4 +140,50 @@ public class ProductController {
                 .body(ApiResponse.created("Category created", category));
     }
 
+    @PutMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update a category (admin)")
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategory(
+            @PathVariable Long id,
+            @Valid @RequestBody CategoryDTO dto) {
+        CategoryDTO category = productService.updateCategory(id, dto);
+        return ResponseEntity.ok(ApiResponse.success("Category updated", category));
+    }
+
+    @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a category (admin)")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
+        productService.deleteCategory(id);
+        return ResponseEntity.ok(ApiResponse.success("Category deleted", null));
+    }
+
+    @GetMapping("/reviews/admin/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: list all reviews (paginated)")
+    public ResponseEntity<ApiResponse<PagedResponse<ReviewDTO>>> getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        PagedResponse<ReviewDTO> result = productService.getAllReviews(PageRequest.of(page, size, Sort.by("createdAt").descending()));
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PutMapping("/reviews/admin/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: moderate review status")
+    public ResponseEntity<ApiResponse<ReviewDTO>> updateReviewStatus(
+            @PathVariable Long id,
+            @RequestParam String status) {
+        ReviewDTO review = productService.updateReviewStatus(id, status);
+        return ResponseEntity.ok(ApiResponse.success("Review status updated", review));
+    }
+
+    @DeleteMapping("/reviews/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Admin: delete a review")
+    public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable Long id) {
+        productService.deleteReview(id);
+        return ResponseEntity.ok(ApiResponse.success("Review deleted", null));
+    }
+
 }

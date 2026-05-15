@@ -10,5 +10,7 @@ public class ReviewDTO {
     @Min(1) @Max(5)
     private int rating;
     private String comment;
+    private String status;
+    private String productName; // For admin view
     private String createdAt;
 }

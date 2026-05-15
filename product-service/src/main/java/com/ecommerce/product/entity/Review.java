@@ -28,7 +28,16 @@ public class Review {
     @Column(length = 2000)
     private String comment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private ReviewStatus status = ReviewStatus.PENDING;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    public enum ReviewStatus {
+        PENDING, APPROVED, REJECTED
+    }
 }

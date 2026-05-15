@@ -229,6 +229,60 @@ public class ProductService {
         return mapCategoryToDTO(category);
     }
 
+    @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
+    public CategoryDTO updateCategory(Long id, CategoryDTO dto) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+
+        category.setName(dto.getName());
+        category.setSlug(dto.getSlug() != null ? dto.getSlug() : toSlug(dto.getName()));
+        category.setDescription(dto.getDescription());
+        category.setImageUrl(dto.getImageUrl());
+
+        if (dto.getParentId() != null) {
+            Category parent = categoryRepository.findById(dto.getParentId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", "id", dto.getParentId()));
+            category.setParent(parent);
+        } else {
+            category.setParent(null);
+        }
+
+        category = categoryRepository.save(category);
+        return mapCategoryToDTO(category);
+    }
+
+    @Transactional
+    @CacheEvict(value = "categories", allEntries = true)
+    public void deleteCategory(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
+        categoryRepository.delete(category);
+    }
+
+    // ===== Reviews Admin =====
+
+    public PagedResponse<ReviewDTO> getAllReviews(Pageable pageable) {
+        Page<ReviewDTO> page = reviewRepository.findAll(pageable).map(this::mapReviewToDTO);
+        return toPagedResponse(page);
+    }
+
+    @Transactional
+    public ReviewDTO updateReviewStatus(Long id, String status) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", id));
+        review.setStatus(Review.ReviewStatus.valueOf(status.toUpperCase()));
+        review = reviewRepository.save(review);
+        return mapReviewToDTO(review);
+    }
+
+    @Transactional
+    public void deleteReview(Long id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", id));
+        reviewRepository.delete(review);
+    }
+
     // ===== Mappers =====
 
     private ProductDTO mapToDTO(Product p) {
@@ -270,7 +324,10 @@ public class ProductService {
     private ReviewDTO mapReviewToDTO(Review r) {
         return ReviewDTO.builder()
                 .id(r.getId()).userId(r.getUserId()).rating(r.getRating())
-                .comment(r.getComment()).createdAt(r.getCreatedAt().toString())
+                .comment(r.getComment())
+                .status(r.getStatus().name())
+                .productName(r.getProduct() != null ? r.getProduct().getName() : null)
+                .createdAt(r.getCreatedAt() != null ? r.getCreatedAt().toString() : null)
                 .build();
     }
 

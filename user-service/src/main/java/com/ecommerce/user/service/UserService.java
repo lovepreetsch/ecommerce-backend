@@ -154,6 +154,14 @@ public class UserService {
         return userProfileRepository.findAll(pageable).map(this::mapToDTO);
     }
 
+    @Transactional
+    public void deleteProfile(Long id) {
+        UserProfile profile = userProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("UserProfile", "id", id));
+        userProfileRepository.delete(profile);
+        log.info("Deleted user profile id: {}", id);
+    }
+
     // ===== Mapping =====
 
     private UserProfileDTO mapToDTO(UserProfile profile) {
